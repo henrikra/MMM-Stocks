@@ -1,0 +1,22 @@
+ul {
+	padding: 0;
+}
+
+li {
+	list-style-type: none;
+	display: flex;
+	justify-content: space-between;
+	padding: 8px 0;
+}
+
+li + li {
+	border-top: 1px solid #666;
+}
+
+.red {
+	color: #fc5c65;
+}
+
+.green {
+	color: #26de81;
+}
