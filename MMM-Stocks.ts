@@ -3,10 +3,13 @@ type Quote = { changePercent: number };
 const createIEXApi = function(apiKey: string) {
 	return {
 		quoteBatch(stocks: string[]): Promise<Record<string, { quote: Quote }>> {
+			const searchParams = new URLSearchParams();
+			searchParams.append("symbols", stocks.join(","));
+			searchParams.append("types", "quote");
+			searchParams.append("token", apiKey);
+
 			return fetch(
-				`https://cloud.iexapis.com/stable/stock/market/batch?symbols=${stocks.join(
-					","
-				)}&types=quote&token=` + apiKey
+				`https://cloud.iexapis.com/stable/stock/market/batch?${searchParams.toString()}`
 			).then(res => res.json());
 		}
 	};
@@ -28,7 +31,7 @@ Module.register<Config, { IEXApi: ReturnType<typeof createIEXApi> }>(
 
 			this.IEXApi.quoteBatch(this.config.stocks)
 				.then(response => {
-					console.log("result", response.DIS.quote);
+					console.log("result", response);
 				})
 				.catch(error => {
 					console.log("erroriiii", error);
