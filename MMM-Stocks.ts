@@ -15,7 +15,13 @@ const createIEXApi = function(apiKey: string) {
 
 			return fetch(
 				`https://cloud.iexapis.com/stable/stock/market/batch?${searchParams.toString()}`
-			).then(res => res.json());
+			).then(res => {
+				if (res.ok) {
+					return res.json();
+				}
+
+				throw new Error("HTTP error");
+			});
 		}
 	};
 };
