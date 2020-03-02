@@ -38,6 +38,7 @@ Module.register<
 	getStyles: function() {
 		return [this.file("styles.css")];
 	},
+
 	getDom: function() {
 		var wrapper = document.createElement("div");
 
@@ -114,20 +115,28 @@ Module.register<
 
 		this.IEXApi = createIEXApi(this.config.apiKey);
 
-		this.IEXApi.quoteBatch(this.config.stocks)
-			.then(response => {
-				this.state = {
-					stocks: {
-						type: "success",
-						data: Object.values(response).map(lol => lol.quote)
-					}
-				};
-				this.updateDom();
-			})
-			.catch(error => {
-				this.state = { stocks: { type: "error", error } };
-				this.updateDom();
-				console.log("error", error);
-			});
+		const fetchStocks = () => {
+			this.IEXApi.quoteBatch(this.config.stocks)
+				.then(response => {
+					this.state = {
+						stocks: {
+							type: "success",
+							data: Object.values(response).map(lol => lol.quote)
+						}
+					};
+					this.updateDom();
+				})
+				.catch(error => {
+					this.state = { stocks: { type: "error", error } };
+					this.updateDom();
+					console.log("error", error);
+				});
+		};
+
+		fetchStocks();
+
+		const fiveMinutes = 300_000;
+
+		setInterval(fetchStocks, fiveMinutes);
 	}
 });
