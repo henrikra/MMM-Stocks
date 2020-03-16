@@ -5,6 +5,28 @@ type Quote = {
 	latestPrice: number;
 };
 
+class HttpError extends Error {
+	isHttpError = true;
+	status: number;
+
+	constructor(message: string, response: Response, ...params: any[]) {
+		// Pass remaining arguments (including vendor specific ones) to parent constructor
+		super(...params);
+
+		this.message = message;
+		this.status = response.status;
+
+		// Maintains proper stack trace for where our error was thrown (only available on V8)
+		if (Error.captureStackTrace) {
+			Error.captureStackTrace(this, HttpError);
+		}
+	}
+}
+
+const isHttpError = (error: Error): error is HttpError => {
+	return !!(error as HttpError).isHttpError;
+};
+
 const createIEXApi = function(apiKey: string) {
 	return {
 		quoteBatch(stocks: string[]): Promise<Record<string, { quote: Quote }>> {
@@ -20,7 +42,7 @@ const createIEXApi = function(apiKey: string) {
 					return res.json();
 				}
 
-				throw new Error("HTTP error");
+				throw new HttpError("HTTP error", res);
 			});
 		}
 	};
@@ -33,6 +55,19 @@ type RequestSuccess<T> = { type: "success"; data: T };
 type RequestError = { type: "error"; error: Error };
 
 type Service<T> = RequestLoading | RequestSuccess<T> | RequestError;
+
+const getErrorMessage = (error: Error) => {
+	if (isHttpError(error)) {
+		switch (error.status) {
+			case 402:
+				return "Free account request limit exceeded";
+			default:
+				return "Unknown error";
+		}
+	}
+
+	return "Unknown error";
+};
 
 Module.register<
 	Config,
@@ -110,7 +145,7 @@ Module.register<
 		} else if (this.state.stocks.type === "loading") {
 			wrapper.innerHTML = "Loading";
 		} else {
-			wrapper.innerHTML = "Error";
+			wrapper.innerHTML = getErrorMessage(this.state.stocks.error);
 		}
 
 		return wrapper;

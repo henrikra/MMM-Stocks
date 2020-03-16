@@ -1,4 +1,39 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var HttpError = /** @class */ (function (_super) {
+    __extends(HttpError, _super);
+    function HttpError(message, response) {
+        var params = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            params[_i - 2] = arguments[_i];
+        }
+        var _this = _super.apply(this, params) || this;
+        _this.isHttpError = true;
+        _this.message = message;
+        _this.status = response.status;
+        // Maintains proper stack trace for where our error was thrown (only available on V8)
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(_this, HttpError);
+        }
+        return _this;
+    }
+    return HttpError;
+}(Error));
+var isHttpError = function (error) {
+    return !!error.isHttpError;
+};
 var createIEXApi = function (apiKey) {
     return {
         quoteBatch: function (stocks) {
@@ -10,10 +45,21 @@ var createIEXApi = function (apiKey) {
                 if (res.ok) {
                     return res.json();
                 }
-                throw new Error("HTTP error");
+                throw new HttpError("HTTP error", res);
             });
         }
     };
+};
+var getErrorMessage = function (error) {
+    if (isHttpError(error)) {
+        switch (error.status) {
+            case 402:
+                return "Free account request limit exceeded";
+            default:
+                return "Unknown error";
+        }
+    }
+    return "Unknown error";
 };
 Module.register("MMM-Stocks", {
     getStyles: function () {
@@ -66,7 +112,7 @@ Module.register("MMM-Stocks", {
             wrapper.innerHTML = "Loading";
         }
         else {
-            wrapper.innerHTML = "Error";
+            wrapper.innerHTML = getErrorMessage(this.state.stocks.error);
         }
         return wrapper;
     },
