@@ -176,8 +176,8 @@ Module.register<
 
 		fetchStocks();
 
-		const fiveMinutes = 300_000;
+		const tenMinutes = 600_000;
 
-		setInterval(fetchStocks, fiveMinutes);
+		setInterval(fetchStocks, tenMinutes);
 	}
 });
