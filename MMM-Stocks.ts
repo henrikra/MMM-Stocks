@@ -162,7 +162,7 @@ Module.register<
 					this.state = {
 						stocks: {
 							type: "success",
-							data: Object.values(response).map(lol => lol.quote)
+							data: Object.values(response).map(company => company.quote)
 						}
 					};
 					this.updateDom();
