@@ -61,6 +61,12 @@ var getErrorMessage = function (error) {
     }
     return "Unknown error";
 };
+var isMarketOpen = function () {
+    var now = new Date();
+    var day = now.getDay();
+    var hour = now.getHours();
+    return day > 0 && day < 6 && hour > 14 && hour < 22;
+};
 Module.register("MMM-Stocks", {
     getStyles: function () {
         return [this.file("styles.css")];
@@ -128,22 +134,24 @@ Module.register("MMM-Stocks", {
         this.state = { stocks: { type: "loading" } };
         this.IEXApi = createIEXApi(this.config.apiKey);
         var fetchStocks = function () {
-            _this.IEXApi.quoteBatch(_this.config.stocks)
-                .then(function (response) {
-                _this.state = {
-                    stocks: {
-                        type: "success",
-                        data: Object.values(response).map(function (company) { return company.quote; })
-                    },
-                    lastFetchedAt: Date.now()
-                };
-                _this.updateDom();
-            })
-                .catch(function (error) {
-                _this.state = { stocks: { type: "error", error: error } };
-                _this.updateDom();
-                console.log("error", error);
-            });
+            if (isMarketOpen()) {
+                _this.IEXApi.quoteBatch(_this.config.stocks)
+                    .then(function (response) {
+                    _this.state = {
+                        stocks: {
+                            type: "success",
+                            data: Object.values(response).map(function (company) { return company.quote; })
+                        },
+                        lastFetchedAt: Date.now()
+                    };
+                    _this.updateDom();
+                })
+                    .catch(function (error) {
+                    _this.state = { stocks: { type: "error", error: error } };
+                    _this.updateDom();
+                    console.log("error", error);
+                });
+            }
         };
         fetchStocks();
         var tenMinutes = 600000;

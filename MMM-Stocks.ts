@@ -69,6 +69,15 @@ const getErrorMessage = (error: Error) => {
 	return "Unknown error";
 };
 
+const isMarketOpen = () => {
+	const now = new Date();
+
+	const day = now.getDay();
+	const hour = now.getHours();
+
+	return day > 0 && day < 6 && hour > 14 && hour < 22;
+};
+
 Module.register<
 	Config,
 	{
@@ -167,22 +176,24 @@ Module.register<
 		this.IEXApi = createIEXApi(this.config.apiKey);
 
 		const fetchStocks = () => {
-			this.IEXApi.quoteBatch(this.config.stocks)
-				.then(response => {
-					this.state = {
-						stocks: {
-							type: "success",
-							data: Object.values(response).map(company => company.quote)
-						},
-						lastFetchedAt: Date.now()
-					};
-					this.updateDom();
-				})
-				.catch(error => {
-					this.state = { stocks: { type: "error", error } };
-					this.updateDom();
-					console.log("error", error);
-				});
+			if (isMarketOpen()) {
+				this.IEXApi.quoteBatch(this.config.stocks)
+					.then(response => {
+						this.state = {
+							stocks: {
+								type: "success",
+								data: Object.values(response).map(company => company.quote)
+							},
+							lastFetchedAt: Date.now()
+						};
+						this.updateDom();
+					})
+					.catch(error => {
+						this.state = { stocks: { type: "error", error } };
+						this.updateDom();
+						console.log("error", error);
+					});
+			}
 		};
 
 		fetchStocks();
