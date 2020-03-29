@@ -154,7 +154,7 @@ Module.register("MMM-Stocks", {
             }
         };
         fetchStocks();
-        var tenMinutes = 600000;
-        setInterval(fetchStocks, tenMinutes);
+        var fiveMinutes = 300000;
+        setInterval(fetchStocks, fiveMinutes);
     }
 });
