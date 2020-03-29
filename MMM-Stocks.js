@@ -106,6 +106,13 @@ Module.register("MMM-Stocks", {
                 listItem.appendChild(numbers);
                 list_1.appendChild(listItem);
             });
+            var lastUpdatedAt = document.createElement("div");
+            var lastUpdatedAtDate = this.state.lastFetchedAt
+                ? new Date(this.state.lastFetchedAt).toLocaleString()
+                : "Unkown";
+            var lastUpdatedAtText = document.createTextNode("Updated at: " + lastUpdatedAtDate);
+            lastUpdatedAt.appendChild(lastUpdatedAtText);
+            wrapper.appendChild(lastUpdatedAt);
             wrapper.appendChild(list_1);
         }
         else if (this.state.stocks.type === "loading") {
@@ -126,8 +133,9 @@ Module.register("MMM-Stocks", {
                 _this.state = {
                     stocks: {
                         type: "success",
-                        data: Object.values(response).map(function (lol) { return lol.quote; })
-                    }
+                        data: Object.values(response).map(function (company) { return company.quote; })
+                    },
+                    lastFetchedAt: Date.now()
                 };
                 _this.updateDom();
             })

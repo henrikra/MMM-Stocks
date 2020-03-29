@@ -73,7 +73,7 @@ Module.register<
 	Config,
 	{
 		IEXApi: ReturnType<typeof createIEXApi>;
-		state: { stocks: Service<Quote[]> };
+		state: { stocks: Service<Quote[]>; lastFetchedAt?: number };
 	}
 >("MMM-Stocks", {
 	getStyles: function() {
@@ -141,6 +141,16 @@ Module.register<
 				list.appendChild(listItem);
 			});
 
+			const lastUpdatedAt = document.createElement("div");
+			const lastUpdatedAtDate = this.state.lastFetchedAt
+				? new Date(this.state.lastFetchedAt).toLocaleString()
+				: "Unkown";
+			const lastUpdatedAtText = document.createTextNode(
+				`Updated at: ${lastUpdatedAtDate}`
+			);
+			lastUpdatedAt.appendChild(lastUpdatedAtText);
+			wrapper.appendChild(lastUpdatedAt);
+
 			wrapper.appendChild(list);
 		} else if (this.state.stocks.type === "loading") {
 			wrapper.innerHTML = "Loading";
@@ -163,7 +173,8 @@ Module.register<
 						stocks: {
 							type: "success",
 							data: Object.values(response).map(company => company.quote)
-						}
+						},
+						lastFetchedAt: Date.now()
 					};
 					this.updateDom();
 				})
