@@ -158,6 +158,7 @@ Module.register<
 				`Updated at: ${lastUpdatedAtDate}`
 			);
 			lastUpdatedAt.appendChild(lastUpdatedAtText);
+			lastUpdatedAt.classList.add("small");
 			wrapper.appendChild(lastUpdatedAt);
 
 			wrapper.appendChild(list);

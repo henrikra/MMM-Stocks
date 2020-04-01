@@ -118,6 +118,7 @@ Module.register("MMM-Stocks", {
                 : "Unkown";
             var lastUpdatedAtText = document.createTextNode("Updated at: " + lastUpdatedAtDate);
             lastUpdatedAt.appendChild(lastUpdatedAtText);
+            lastUpdatedAt.classList.add("small");
             wrapper.appendChild(lastUpdatedAt);
             wrapper.appendChild(list_1);
         }
