@@ -75,7 +75,7 @@ const isMarketOpen = () => {
 	const day = now.getDay();
 	const hour = now.getHours();
 
-	return day > 0 && day < 6 && hour > 14 && hour < 22;
+	return day > 0 && day < 6 && hour > 15 && hour < 23;
 };
 
 Module.register<
